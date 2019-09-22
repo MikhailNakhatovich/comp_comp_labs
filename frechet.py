@@ -13,6 +13,12 @@ def n_min(*args):
 
 
 def distance_frechet(P, Q):
+    """
+    Function for finding Frechet distance between two lines.
+    :param P: one of the lines
+    :param Q: one of the lines
+    :return: three digits: first - value of the Frechet distance, other - indexes of the points at which the distance is reached
+    """
     def c(i, j):
         n_i = i
         n_j = j
@@ -38,6 +44,13 @@ def distance_frechet(P, Q):
 
 
 def draw_plot(P, Q, points):
+    """
+    Function for drawing two lines with Frechet distance between it.
+    :param P: one of the lines
+    :param Q: one of the lines
+    :param points: array-like object with two digits - indexes of the points at which the distance is reached
+    """
+
     plt.figure()
     plt.plot(P[:, 0], P[:, 1], color='blue')
     plt.plot(Q[:, 0], Q[:, 1], color='orange')
@@ -45,20 +58,3 @@ def draw_plot(P, Q, points):
     plt.legend(['P', 'Q', 'Frechet distance'])
     plt.grid(True)
     plt.show()
-
-
-def run_test():
-    P = np.array([(0, 0), (4, 2), (6, 5), (12, 6), (15, 7), (15, 10), (18, 13)])
-    Q = np.array([(1, 1), (2, 5), (7, 7), (8, 12), (13, 14), (15, 16)])
-
-    P_star = np.array([(2, 2), (3, 4), (2, 7), (5, 6), (9, 8), (8, 5), (10, 1), (6, 3), (2, 2)])
-    Q_star = np.array([(12, 1), (10, 3), (6, 6), (9, 7), (10, 9), (12, 6), (15, 5), (13, 3), (12, 1)])
-
-    dist, i, j = distance_frechet(P, Q)
-    dist_star, i_star, j_star = distance_frechet(P_star, Q_star)
-
-    print("P:\n%s\nQ:\n%s\ndF(P, Q) = %f" % (str(P), str(Q), dist))
-    draw_plot(P, Q, (i, j))
-    print("\n")
-    print("P:\n%s\nQ:\n%s\ndF(P, Q) = %f" % (str(P_star), str(Q_star), dist_star))
-    draw_plot(P_star, Q_star, (i_star, j_star))
