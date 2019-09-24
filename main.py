@@ -1,5 +1,6 @@
-from examples.frechet import run_example_frechet
+from examples.section import run_example_section1, run_example_section2
 
 
 if __name__ == '__main__':
-    run_example_frechet()
+    run_example_section1()
+    run_example_section2()
