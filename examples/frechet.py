@@ -3,7 +3,7 @@ import numpy as np
 from frechet import distance_frechet, draw_plot
 
 
-def run_test_frechet():
+def run_example_frechet():
     P = np.array([(0, 0), (4, 2), (6, 5), (12, 6), (15, 7), (15, 10), (18, 13)])
     Q = np.array([(1, 1), (2, 5), (7, 7), (8, 12), (13, 14), (15, 16)])
 
