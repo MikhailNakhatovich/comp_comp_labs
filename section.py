@@ -2,7 +2,6 @@ from math import cos, sin, sqrt
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from scipy import spatial
 
 
 def get_circle_points(r, z):
@@ -30,19 +29,6 @@ def get_intersection(r, z, plane):
         return np.array([(x1, y1, z), (x2, y2, z)])
 
 
-def sort_by_nearest(points):
-    if len(points) == 0:
-        return []
-    dist, ind = spatial.KDTree(points).query([0, 0, 0])
-    res = [points[ind]]
-    points = np.delete(points, ind, 0)
-    for i in range(len(points)):
-        dist, ind = spatial.KDTree(points).query(res[-1])
-        res.append(points[ind])
-        points = np.delete(points, ind, 0)
-    return res
-
-
 def find_section_by_zero_plane(obj):
     res = []
     for p in obj[obj[:1] == 0]:
@@ -57,12 +43,11 @@ def find_section_by_nonzero_plane(obj, plane):
     return res
 
 
-def find_section_by_plane(obj, plane, sort=False):
+def find_section_by_plane(obj, plane):
     """
     Function for find section of some rotation figure by plane
     :param obj: ndarray of points in format (radius, z)
     :param plane: array_like object with three digits - a, b and c for plane `ax + by = c`
-    :param sort: if it needs to sort points by distance between it
     :return: ndarray of points which represents section
     """
 
@@ -73,8 +58,6 @@ def find_section_by_plane(obj, plane, sort=False):
             raise ValueError("Incorrect plane")
     else:
         res = find_section_by_nonzero_plane(obj, plane)
-    if sort:
-        res = sort_by_nearest(res)
     return np.array(res)
 
 
