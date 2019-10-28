@@ -11,6 +11,13 @@ def get_circle_points(r, z):
 
 
 def get_intersection(r, z, plane):
+    """
+    Get points of intersection of a circle and a line
+    :param r: radius
+    :param z: z
+    :param plane: array_like object with three digits - a, b and c for plane `ax + by = c`
+    :return: ndarray of points which represents intersection of a circle and a line
+    """
     a, b, c = plane
     s_len = a * a + b * b
     x0 = a * c / s_len
@@ -29,7 +36,7 @@ def get_intersection(r, z, plane):
         return np.array([(x1, y1, z), (x2, y2, z)])
 
 
-def find_section_by_zero_plane(obj):
+def find_section_by_zero_plane(obj):  # zero plane is z = 0
     res = []
     for p in obj[obj[:1] == 0]:
         res.extend(get_circle_points(p[0], p[1]))
