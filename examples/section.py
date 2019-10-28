@@ -27,7 +27,11 @@ def draw_plot_points(plot, points, azim=0):
     plot = np.concatenate((plot, [plot[0]]))
     ax.plot(plot[:, 0], plot[:, 1], zs=plot[:, 2])
     ax.view_init(azim=azim)
-    ax.scatter(points[:, 0], points[:, 1], points[:, 2], c='#ff7f0e')
+    ax.scatter(points[:, 0], points[:, 1], points[:, 2], c='#ff7f0e', s=10)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.legend(['Section', 'Lemniscate of Bernoulli'])
     plt.show()
 
 
