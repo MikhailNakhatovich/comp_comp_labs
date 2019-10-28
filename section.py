@@ -80,6 +80,9 @@ def draw_plot(sections, azim=None):
             section = np.concatenate((section, [section[0]]))
             ax.plot(section[:, 0], section[:, 1], zs=section[:, 2])
     ax.view_init(azim=azim)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
     plt.show()
 
 
@@ -99,4 +102,7 @@ def draw_points(sections, azim=None):
         else:
             ax.scatter(section[:, 0], section[:, 1], section[:, 2])
     ax.view_init(azim=azim)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
     plt.show()
