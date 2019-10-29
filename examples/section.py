@@ -61,3 +61,11 @@ def run_example_section2():
     draw_plot_points(section, lemn, 45)
     d, i, j = distance_frechet(section, lemn)
     print("distance = " + str(d))
+
+
+def run_example_section3():
+    planes = [(1, 0, 0), (1, 0, 5), (1, 0, 7), (1, 0, 10), (1, 0, 15)]
+    points = gen_torus_points((10, 0), 5)
+    for plane in planes:
+        sections = find_section_by_plane(points, plane)
+        draw_points([sections], azim=0)
