@@ -1,5 +1,5 @@
-from frechet import run_test
+from examples.section import run_example_section3
 
 
 if __name__ == '__main__':
-    run_test()
+    run_example_section3()
