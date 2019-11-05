@@ -13,11 +13,16 @@ def get_circle_points(r, z):
 def get_intersection(r, z, plane):
     """
     Get points of intersection of a circle and a line
-    :param r: radius
-    :param z: z
-    :param plane: array_like object with three digits - a, b and c for plane `ax + by = c`
-    :return: ndarray of points which represents intersection of a circle and a line
+    :param r: float
+        radius
+    :param z: float
+        z
+    :param plane: array_like
+        three digits - a, b and c for plane `ax + by = c`
+    :return intersection: ndarray
+        points which represent the intersection of a circle and a line
     """
+
     a, b, c = plane
     s_len = a * a + b * b
     x0 = a * c / s_len
@@ -53,9 +58,12 @@ def find_section_by_nonzero_plane(obj, plane):
 def find_section_by_plane(obj, plane):
     """
     Function for find section of some rotation figure by plane
-    :param obj: ndarray of points in format (radius, z)
-    :param plane: array_like object with three digits - a, b and c for plane `ax + by = c`
-    :return: ndarray of points which represents section
+    :param obj: ndarray
+        points in format (radius, z) which represent the rotation figure
+    :param plane: array_like
+        three digits - a, b and c for plane `ax + by = c`
+    :return section: ndarray
+        points which represents section
     """
 
     if plane[0] == 0 and plane[1] == 0:
@@ -72,8 +80,10 @@ def draw_plot(sections, azim=None):
     """
     Function for drawing sections of some rotation figure or figures by plane or planes
     This function draws a plot
-    :param sections: array_like object with sections (ndarray) of some rotation figure or figures by plane or planes
-    :param azim: stores the azimuth angle in the x,y plane (in degrees)
+    :param sections: array_like
+        array with sections (ndarrays) of some rotation figure or figures by plane or planes
+    :param azim: float
+        stores the azimuth angle in the x,y plane (in degrees)
     """
 
     fig = plt.figure()
@@ -97,8 +107,10 @@ def draw_points(sections, azim=None):
     """
     Function for drawing sections of some rotation figure or figures by plane or planes
     This function draws a points without lines between it
-    :param sections: array_like object with sections (ndarray) of some rotation figure or figures by plane or planes
-    :param azim: stores the azimuth angle in the x,y plane (in degrees)
+    :param sections: array_like
+        array with sections (ndarrays) of some rotation figure or figures by plane or planes
+    :param azim: float
+        stores the azimuth angle in the x,y plane (in degrees)
     """
 
     fig = plt.figure()

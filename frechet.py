@@ -15,9 +15,16 @@ def n_min(*args):
 def distance_frechet(P, Q):
     """
     Function for finding Frechet distance between two lines.
-    :param P: ndarray - one of the lines
-    :param Q: ndarray - one of the lines
-    :return: three digits: first - value of the Frechet distance, other - indexes of the points at which the distance is reached
+    :param P: ndarray
+        one of the lines
+    :param Q: ndarray
+        one of the lines
+    :return distance: float
+        value of the Frechet distance
+    :return i: int
+        index of the point of P at which the distance is reached
+    :return j: int
+        index of the point of Q at which the distance is reached
     """
 
     def c(i, j):
@@ -47,9 +54,12 @@ def distance_frechet(P, Q):
 def draw_plot(P, Q, points):
     """
     Function for drawing two lines with Frechet distance between it.
-    :param P: ndarray - one of the lines
-    :param Q: ndarray - one of the lines
-    :param points: array_like object with two digits - indexes of the points at which the distance is reached
+    :param P: ndarray
+        one of the lines
+    :param Q: ndarray
+        one of the lines
+    :param points: array_like
+        two digits - indexes of the points at which the distance is reached
     """
 
     plt.figure()
