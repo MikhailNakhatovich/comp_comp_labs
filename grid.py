@@ -13,7 +13,7 @@ def draw_grid(lines, center, radial_lines):
         radial lines including four support radial lines
         each line represents by ndarray
     """
-    
+
     plt.figure()
     for line in lines:
         line = np.concatenate((line, [line[0]]))
@@ -98,7 +98,7 @@ def get_radial_lines(border, center, indices, radials):
         generated radial lines including four support radial lines
     """
 
-    radial_lines = []
+    radial_indices = set()
     indices_len = len(indices)
     n = len(border)
     for i in range(indices_len):
@@ -106,9 +106,9 @@ def get_radial_lines(border, center, indices, radials):
         ind2 = indices[(i + 1) % indices_len]
         if ind2 < ind1:
             ind1 = ind2 - (ind2 + n - ind1)
-        for k in np.delete(np.linspace(ind1, ind2, radials + 2), -1):
-            radial_lines.append(np.array([center, border[int(k)]]))
-    return np.array(radial_lines)
+        for k in np.linspace(ind1, ind2, radials + 2):
+            radial_indices.add(int(k))
+    return np.array([np.array([center, border[_]]) for _ in radial_indices])
 
 
 def get_lines(border, radial_lines, count):
