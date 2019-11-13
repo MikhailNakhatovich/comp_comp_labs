@@ -79,7 +79,7 @@ def get_radius(line):
         m2 = (p3[1] - p2[1]) / (p3[0] - p2[0])
         x = (m1 * m2 * (p1[1] - p3[1]) + m2 * (p1[0] + p2[0]) - m1 * (p2[0] + p3[0])) / (2 * (m2 - m1))
         y = ((p1[0] + p2[0]) / 2 - x) / m1 + (p1[1] + p2[1]) / 2
-        radius[i] = np.linalg.norm(p1 - np.array([x, y]))
+        radius[i - 1] = np.linalg.norm(p1 - np.array([x, y]))
     return radius
 
 
