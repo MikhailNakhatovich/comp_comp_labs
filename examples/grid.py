@@ -1,7 +1,7 @@
 import numpy as np
 
 from gfileextractor import extract
-from grid import generate_grid, draw_grid
+from grid import generate_grid, draw_grid, generate_domain_grid, draw_domains
 
 
 def run_example_grid1():
@@ -11,5 +11,8 @@ def run_example_grid1():
     rmin = min // mag_mesh
     zmin = min - rmin * mag_mesh
     center = (R[rmin], Z[zmin])
-    lines, radial_lines = generate_grid(np.column_stack((RBDRY, ZBDRY)), center, count=3, radials=6)
+    border = np.column_stack((RBDRY, ZBDRY))
+    lines, radial_lines = generate_grid(border, center, count=3, radials=6)
     draw_grid(lines, center, radial_lines)
+    domains = generate_domain_grid(border, center, count=3, radials=6)
+    draw_domains(domains, center)

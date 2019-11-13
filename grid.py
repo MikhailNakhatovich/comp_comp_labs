@@ -28,6 +28,27 @@ def draw_grid(lines, center, radial_lines):
     plt.show()
 
 
+def draw_domains(domains, center):
+    """
+    Function for drawing grid
+    :param domains: ndarray
+        grid domains between grid lines and radial lines
+    :param center: array_like
+        two digits - point of the center of the grid
+    """
+
+    plt.figure()
+    for line in domains:
+        line = np.concatenate((line, [line[0]]))
+        plt.plot(line[:, 0], line[:, 1], color='blue')
+    plt.scatter(center[0], center[1], c='green')
+    plt.grid(True)
+    plt.xlabel('r')
+    plt.ylabel('z')
+    plt.gca().set_aspect('equal')
+    plt.show()
+
+
 def draw_radius(radius):
     x = np.arange(len(radius))
     plt.figure()
@@ -81,21 +102,19 @@ def get4indices(line, radius):
     return sorted([min1 + 1, (min2 + ind2 + 1) % n, ind1, ind2])
 
 
-def get_radial_lines(border, center, indices, radials):
+def get_radial_indices(border, indices, radials):
     """
-    Function for getting all radial lines
+    Function for getting all radial indices
     :param border: array_like
         outer border line that represents by ndarrays
         closed curve, but border[0] is not equal to border[-1]
-    :param center:
-        two digits - point of the center of the grid
     :param indices: array_like
         four indices in the `line` of four points for four support radial lines
     :param radials: int
         count of radial lines between four support radial lines
         must be non-negative
-    :return radial_lines: ndarray
-        generated radial lines including four support radial lines
+    :return radial_indices: set
+        generated radial indices including four support `indices`
     """
 
     radial_indices = set()
@@ -108,7 +127,7 @@ def get_radial_lines(border, center, indices, radials):
             ind1 = ind2 - (ind2 + n - ind1)
         for k in np.linspace(ind1, ind2, radials + 2):
             radial_indices.add(int(k))
-    return np.array([np.array([center, border[_]]) for _ in radial_indices])
+    return radial_indices
 
 
 def get_lines(border, radial_lines, count):
@@ -133,7 +152,7 @@ def get_lines(border, radial_lines, count):
             c = line[0]
             p = line[1]
             for k in range(1, count + 1):
-                lines[k - 1].append(c * alpha * k + p * (1 - alpha * k))
+                lines[k - 1].append(c * (1 - alpha * k) + p * alpha * k)
         for i in range(len(lines)):
             lines[i] = np.array(lines[i])
     else:
@@ -167,6 +186,88 @@ def generate_grid(border, center, count=0, radials=0):
     radius = get_radius(border)
     # draw_radius(radius)
     indices = get4indices(border, radius)
-    radial_lines = get_radial_lines(border, center, indices, radials)
+    radial_lines = np.array([np.array([center, border[_]]) for _ in get_radial_indices(border, indices, radials)])
     lines = get_lines(border, radial_lines, count)
     return lines, radial_lines
+
+
+def get_domains(border, center, radial_indices, count):
+    """
+    Function for getting all grid domains
+    :param border: array_like
+        outer border line that represents by ndarrays
+        closed curve, but border[0] is not equal to border[-1]
+    :param center:
+        two digits - point of the center of the grid
+    :param radial_indices: set
+        radial indices including four support indices
+    :param count: int
+        count of lines to generate
+        must be non-negative
+    :return domains: ndarray
+        generated grid domains
+    """
+
+    def get_indices():
+        return radial_indices[i], radial_indices[(i + 1) % n]
+
+    def get_two_points(a, b):
+        return border[ind] * a + center * b, border[ind1] * a + center * b
+
+    center = np.array(center)
+    radial_indices = list(radial_indices)
+    domains = []
+    n = len(radial_indices)
+    if count > 0:
+        alpha = 1 / (count + 1)
+        alpha_1 = 1 - alpha
+        for i in range(n):
+            ind, ind1 = get_indices()
+            p2, p1 = get_two_points(alpha_1, alpha)
+            domains.append(np.concatenate((border[ind:ind1 - 1], [border[ind1 - 1], border[ind1], p1, p2])))
+        for k in range(1, count):
+            ak = alpha * k
+            ak_1 = 1 - ak
+            ak1 = alpha * (k + 1)
+            ak1_1 = 1 - ak1
+            for i in range(n):
+                ind, ind1 = get_indices()
+                p1, p2 = get_two_points(ak_1, ak)
+                p4, p3 = get_two_points(ak1_1, ak1)
+                domains.append(np.array([p1, p2, p3, p4]))
+        for i in range(n):
+            ind, ind1 = get_indices()
+            p1, p2 = get_two_points(alpha, alpha_1)
+            domains.append(np.array([p1, p2, center]))
+    else:
+        for i in range(n):
+            ind, ind1 = get_indices()
+            domains.append(np.concatenate((border[ind:ind1 - 1], [border[ind1 - 1], border[ind1], center])))
+    return np.array(domains)
+
+
+def generate_domain_grid(border, center, count=0, radials=0):
+    """
+    Function for generation of grid
+    :param border: ndarray
+        outer border line that represents by ndarrays
+        closed curve, but border[0] is not equal to border[-1]
+    :param center: array_like
+        two digits - point of the center of the grid
+    :param count: int
+        count of lines to generate
+        must be non-negative
+    :param radials: int
+        count of radial lines between four support radial lines
+        must be non-negative
+    :return domains: ndarray
+        generated grid domains
+    """
+
+    radials = int(radials)
+    count = int(count)
+    radius = get_radius(border)
+    # draw_radius(radius)
+    indices = get4indices(border, radius)
+    radial_indices = get_radial_indices(border, indices, radials)
+    return get_domains(border, center, radial_indices, count)
