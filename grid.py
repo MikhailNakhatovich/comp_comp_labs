@@ -126,7 +126,8 @@ def get_radial_indices(border, indices, radials):
         if ind2 < ind1:
             ind1 = ind2 - (ind2 + n - ind1)
         for k in np.linspace(ind1, ind2, radials + 2):
-            radial_indices.add(int(k))
+            if not radial_indices.__contains__(n + k):
+                radial_indices.add(int(k))
     return radial_indices
 
 
