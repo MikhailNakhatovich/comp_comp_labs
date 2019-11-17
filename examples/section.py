@@ -21,7 +21,7 @@ def run_example_section1():
         draw_points(sections, azim=0)
 
 
-def draw_plot_points(plot, points, azim=0):
+def draw_plot_points(plot, points, azim=0.0):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     plot = np.concatenate((plot, [plot[0]]))
