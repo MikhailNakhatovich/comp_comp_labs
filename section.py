@@ -125,3 +125,34 @@ def draw_points(sections, azim=None):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.show()
+
+
+def sorted_section_by_nonzero_plane(obj, plane):
+    if plane[0] == 0 and plane[1] == 0:
+        raise ValueError("Incorrect plane")
+
+    res = [[], []]
+    ind = -1
+    for i, p in enumerate(obj):
+        intersect = get_intersection(p[0], p[1], plane)
+        if len(intersect) == 0:
+            ind = len(res[0])
+        else:
+            res[0].append(intersect[0])
+            res[1].append(intersect[1])
+    if ind != -1:
+        res[0] = res[0][ind:] + res[0][:ind]
+        res[1] = res[1][ind:] + res[1][:ind]
+    # else:
+    #     ind = np.argmin(obj[:, 1])
+    #     ind2 = (ind + 1) % obj.shape[0]
+    #     ind3 = ind - 1
+    #     if ind3 < 0:
+    #         ind3 + obj.shape[0]
+    #     if obj[ind3, 1] < obj[ind2, 1]:
+    #         ind2 = ind3
+    #     ind, ind2 = sorted([ind, ind2])
+    #     res[0] = res[0][ind2:] + res[0][:ind + 1]
+    #     res[1] = res[1][ind2:] + res[1][:ind + 1]
+    res[1].reverse()
+    return np.array(res[0] + res[1])
