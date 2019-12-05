@@ -63,7 +63,7 @@ def find_section_by_plane(obj, plane):
     :param plane: array_like
         three digits - a, b and c for plane `ax + by = c`
     :return section: ndarray
-        points which represents section
+        points which represent the section
     """
 
     if plane[0] == 0 and plane[1] == 0:
@@ -137,7 +137,7 @@ def sorted_section_by_nonzero_plane(obj, plane):
         three digits - a, b and c for plane `ax + by = c`
         only one of a, b, c can be zero
     :return section: ndarray
-        ordered points which represents section
+        ordered points which represent the section
     """
 
     res = [[], []]
