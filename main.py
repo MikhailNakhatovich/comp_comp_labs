@@ -1,5 +1,5 @@
-from examples.grid import run_example_grid1
+from examples.chord_matrix import run_example_chord1
 
 
 if __name__ == '__main__':
-    run_example_grid1()
+    run_example_chord1()
