@@ -8,7 +8,7 @@ from grid import generate_domain_grid, draw_domains
 from section import sorted_section_by_nonzero_plane
 
 
-def get_domains(border, center, count=0, radials=0):
+def get_domains(border, center, count=0, radials=0, verbose=False):
     """
     Function for generation of grid and reordering domains of this grid
     :param border: ndarray
@@ -22,6 +22,8 @@ def get_domains(border, center, count=0, radials=0):
     :param radials: int
         count of radial lines between four support radial lines
         must be non-negative
+    :param verbose: boolean
+        if `True` it needs to draw a plot
     :return domains: ndarray
         generated grid domains
     """
@@ -32,7 +34,8 @@ def get_domains(border, center, count=0, radials=0):
         up_domains = np.flip(domains[i * n:i * n + n // 2], axis=0)
         bottom_domains = np.flip(domains[i * n + n // 2:(i + 1) * n], axis=0)
         domains[i * n:(i + 1) * n] = np.concatenate((up_domains, bottom_domains))
-    draw_domains(domains, center)
+    if verbose:
+        draw_domains(domains, center)
     return domains
 
 
@@ -134,19 +137,22 @@ def get_detector():
     return points_xy, points_z, aperture_xy, spd_xy
 
 
-def get_intersection_length(points, line_points):
+def get_intersection_length(points, line_points, verbose=False):
     """
     Function for getting length of intersection of polygon and line
     :param points: array_like
         points that represent the polygon
     :param line_points: array_like
         points that represent the line
+    :param verbose: boolean
+        if `True` it needs to draw a plot
     :return:
         length of the intersection
     """
 
     def get_length(line_string, c='k'):
-        plt.scatter(line_string.xy[0], line_string.xy[1], c=c, s=5)
+        if verbose:
+            plt.scatter(line_string.xy[0], line_string.xy[1], c=c, s=5)
         return line_string.length
 
     length = 0
@@ -162,7 +168,7 @@ def get_intersection_length(points, line_points):
     return length
 
 
-def generate_chord_matrix(border, center, count=0, radials=0):
+def generate_chord_matrix(border, center, count=0, radials=0, verbose=False):
     """
     Function for generation matrix of chords' lengths
     :param border: ndarray
@@ -176,24 +182,28 @@ def generate_chord_matrix(border, center, count=0, radials=0):
     :param radials: int
         count of radial lines between four support radial lines
         must be non-negative
+    :param verbose: boolean
+        if `True` it needs to draw plots
     :return domains: ndarray
         generated matrix of chords' lengths
     """
 
-    domains = get_domains(border, center, count=count, radials=radials)
+    domains = get_domains(border, center, count=count, radials=radials, verbose=verbose)
 
     points_xy, points_z, aperture_xy, spd_xy = get_detector()
-    # draw_detector(points_xy, points_z, aperture_xy)
-    # draw_top(border, points_xy, aperture_xy)
+    if verbose:
+        draw_detector(points_xy, points_z, aperture_xy)
+        draw_top(border, points_xy, aperture_xy)
 
     matrix = np.zeros((256, (count + 1) * (radials + 1) * 4))
 
     for j in range(16):
-        plt.figure(figsize=(10, 10))
-        plt.grid(True)
-        plt.xlabel('y')
-        plt.ylabel('z')
-        plt.gca().set_aspect('equal')
+        if verbose:
+            plt.figure(figsize=(10, 10))
+            plt.grid(True)
+            plt.xlabel('y')
+            plt.ylabel('z')
+            plt.gca().set_aspect('equal')
 
         line = create_line(points_xy[j], aperture_xy)
         spd_r = -sqrt(norm(spd_xy) ** 2 - line[2] ** 2)
@@ -206,25 +216,28 @@ def generate_chord_matrix(border, center, count=0, radials=0):
                 if section.shape[0] >= 2 * domain.shape[0]:
                     left = section[section[:, 1] <= 0, 1:]
                     right = section[section[:, 1] >= 0, 1:]
-                    c_left = np.concatenate((left, left[:1]))
-                    c_right = np.concatenate((right, right[:1]))
-                    plt.plot(c_left[:, 0], c_left[:, 1], color='b', linewidth=0.7)
-                    plt.plot(c_right[:, 0], c_right[:, 1], color='r', linewidth=0.7)
+                    if verbose:
+                        c_left = np.concatenate((left, left[:1]))
+                        c_right = np.concatenate((right, right[:1]))
+                        plt.plot(c_left[:, 0], c_left[:, 1], color='b', linewidth=0.7)
+                        plt.plot(c_right[:, 0], c_right[:, 1], color='r', linewidth=0.7)
                     for k, l_p in enumerate(line_points):
-                        matrix[j * 16 + k, i] += get_intersection_length(left, l_p)
+                        matrix[j * 16 + k, i] += get_intersection_length(left, l_p, verbose=verbose)
                     if j < 12:
                         for k, l_p in enumerate(line_points):
-                            matrix[j * 16 + k, i] += get_intersection_length(right, l_p)
+                            matrix[j * 16 + k, i] += get_intersection_length(right, l_p, verbose=verbose)
                 elif section.shape[0] > 2:
                     points = section[:, 1:]
-                    c_points = np.concatenate((points, points[:1]))
-                    plt.plot(c_points[:, 0], c_points[:, 1], color='g', linewidth=0.7)
+                    if verbose:
+                        c_points = np.concatenate((points, points[:1]))
+                        plt.plot(c_points[:, 0], c_points[:, 1], color='g', linewidth=0.7)
                     for k, l_p in enumerate(line_points):
-                        matrix[j * 16 + k, i] += get_intersection_length(points, l_p)
+                        matrix[j * 16 + k, i] += get_intersection_length(points, l_p, verbose=verbose)
 
-        for i, line in enumerate(lines):
-            draw_line(line, points_xy[j][1], 0.6, 'm')
-        plt.scatter(aperture_xz_offset + spd_r, 0, c='y')
-        plt.show()
+        if verbose:
+            for i, line in enumerate(lines):
+                draw_line(line, points_xy[j][1], 0.6, 'm')
+            plt.scatter(aperture_xz_offset + spd_r, 0, c='y')
+            plt.show()
 
     return matrix
