@@ -1,4 +1,4 @@
-from math import acos, cos, sin, sqrt, atan2, pi
+from math import acos, cos, sin, sqrt
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import norm
@@ -74,7 +74,7 @@ def line_value(x, line):
 def draw_line(line, l, r, color='r'):
     x = np.linspace(l, r, 100)
     y = line_value(x, line)
-    plt.plot(x, y, color=color, linewidth=1)
+    plt.plot(x, y, color, linewidth=1)
 
 
 def draw_detector(points_xy, points_z, aperture_xy):
@@ -82,7 +82,7 @@ def draw_detector(points_xy, points_z, aperture_xy):
     ax = fig.gca()
     plt.grid(True)
     for i in range(16):
-        plt.scatter(np.full(16, points_xy[i][0]), points_z, c='b')
+        plt.scatter(np.full(16, points_xy[i][0]), points_z, c='b', marker='s')
     ax.set_aspect('equal')
     plt.xlabel('x')
     plt.ylabel('z')
@@ -91,8 +91,10 @@ def draw_detector(points_xy, points_z, aperture_xy):
     fig = plt.figure(figsize=(10, 10))
     ax = fig.gca()
     plt.grid(True)
-    plt.scatter(points_xy[:, 0], points_xy[:, 1], c='b')
-    plt.scatter(aperture_xy[0], aperture_xy[1], c='g')
+    plt.scatter(points_xy[:, 0], points_xy[:, 1], c='b', marker='s')
+    for i in range(16):
+        draw_line(create_line(points_xy[i], aperture_xy), points_xy[i][0], aperture_xy[0], 'r--')
+    plt.scatter(aperture_xy[0], aperture_xy[1], c='k')
     ax.set_aspect('equal')
     plt.xlabel('x')
     plt.ylabel('y')
@@ -103,12 +105,14 @@ def draw_top(border, points_xy, aperture_xy):
     fig = plt.figure(figsize=(10, 10))
     ax = fig.gca()
     plt.grid(True)
-    ax.add_artist(plt.Circle((0, 0), border[:, 0].min(), color='b', fill=False))
-    ax.add_artist(plt.Circle((0, 0), border[:, 0].max(), color='b', fill=False))
+    ax.add_artist(plt.Circle((0, 0), border[:, 0].min(), color='tab:gray'))
+    ax.add_artist(plt.Circle((0, 0), border[:, 0].max(), color='k', fill=False))
     for j in range(16):
-        draw_line(create_line(points_xy[j], aperture_xy), points_xy[j][0], 0.8)
-    plt.scatter(aperture_xy[0], aperture_xy[1], c='g')
+        draw_line(create_line(points_xy[j], aperture_xy), points_xy[j][0], 0.8, 'r--')
+    plt.scatter(aperture_xy[0], aperture_xy[1], c='k')
     ax.set_aspect('equal')
+    plt.xlabel('x')
+    plt.ylabel('y')
     plt.xlim((-0.8, 0.8))
     plt.ylim((-0.8, 0.8))
     plt.show()
@@ -152,7 +156,7 @@ def get_intersection_length(points, line_points, verbose=False):
 
     def get_length(line_string, c='k'):
         if verbose:
-            plt.scatter(line_string.xy[0], line_string.xy[1], c=c, s=5)
+            plt.scatter(line_string.xy[0], line_string.xy[1], c=c, s=7)
         return line_string.length
 
     length = 0
@@ -199,7 +203,7 @@ def generate_chord_matrix(border, center, count=0, radials=0, verbose=False):
 
     for j in range(16):
         if verbose:
-            plt.figure(figsize=(10, 10))
+            plt.figure(figsize=(10, 5))
             plt.grid(True)
             plt.xlabel('y')
             plt.ylabel('z')
@@ -220,7 +224,7 @@ def generate_chord_matrix(border, center, count=0, radials=0, verbose=False):
                         c_left = np.concatenate((left, left[:1]))
                         c_right = np.concatenate((right, right[:1]))
                         plt.plot(c_left[:, 0], c_left[:, 1], color='b', linewidth=0.7)
-                        plt.plot(c_right[:, 0], c_right[:, 1], color='r', linewidth=0.7)
+                        plt.plot(c_right[:, 0], c_right[:, 1], color='b', linewidth=0.7)
                     for k, l_p in enumerate(line_points):
                         matrix[j * 16 + k, i] += get_intersection_length(left, l_p, verbose=verbose)
                     if j < 12:
@@ -230,14 +234,15 @@ def generate_chord_matrix(border, center, count=0, radials=0, verbose=False):
                     points = section[:, 1:]
                     if verbose:
                         c_points = np.concatenate((points, points[:1]))
-                        plt.plot(c_points[:, 0], c_points[:, 1], color='g', linewidth=0.7)
+                        plt.plot(c_points[:, 0], c_points[:, 1], color='b', linewidth=0.7)
                     for k, l_p in enumerate(line_points):
                         matrix[j * 16 + k, i] += get_intersection_length(points, l_p, verbose=verbose)
 
         if verbose:
             for i, line in enumerate(lines):
-                draw_line(line, points_xy[j][1], 0.6, 'm')
-            plt.scatter(aperture_xz_offset + spd_r, 0, c='y')
+                draw_line(line, points_xy[j][1], 0.6)
+            plt.scatter(aperture_xz_offset + spd_r, 0, c='g', s=25)
+            plt.savefig('../section_chord_%d.png' % (j + 1))
             plt.show()
 
     return matrix
