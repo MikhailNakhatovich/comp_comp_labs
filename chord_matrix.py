@@ -242,7 +242,6 @@ def generate_chord_matrix(border, center, count=0, radials=0, verbose=False):
             for i, line in enumerate(lines):
                 draw_line(line, points_xy[j][1], 0.6)
             plt.scatter(aperture_xz_offset + spd_r, 0, c='g', s=25)
-            plt.savefig('../section_chord_%d.png' % (j + 1))
             plt.show()
 
     return matrix
