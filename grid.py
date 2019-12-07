@@ -14,12 +14,12 @@ def draw_grid(lines, center, radial_lines):
         each line represents by ndarray
     """
 
-    plt.figure()
+    plt.figure(figsize=(10, 10))
     for line in lines:
         line = np.concatenate((line, [line[0]]))
-        plt.plot(line[:, 0], line[:, 1], color='blue')
+        plt.plot(line[:, 0], line[:, 1], color='blue', linewidth=1)
     for line in radial_lines:
-        plt.plot(line[:, 0], line[:, 1], color='red')
+        plt.plot(line[:, 0], line[:, 1], color='red', linewidth=1)
     plt.scatter(center[0], center[1], c='green')
     plt.grid(True)
     plt.xlabel('r')
@@ -37,10 +37,10 @@ def draw_domains(domains, center):
         two digits - point of the center of the grid
     """
 
-    plt.figure()
+    plt.figure(figsize=(10, 10))
     for line in domains:
         line = np.concatenate((line, [line[0]]))
-        plt.plot(line[:, 0], line[:, 1], color='blue')
+        plt.plot(line[:, 0], line[:, 1], color='blue', linewidth=1)
     plt.scatter(center[0], center[1], c='green')
     plt.grid(True)
     plt.xlabel('r')

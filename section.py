@@ -63,7 +63,7 @@ def find_section_by_plane(obj, plane):
     :param plane: array_like
         three digits - a, b and c for plane `ax + by = c`
     :return section: ndarray
-        points which represents section
+        points which represent the section
     """
 
     if plane[0] == 0 and plane[1] == 0:
@@ -125,3 +125,32 @@ def draw_points(sections, azim=None):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.show()
+
+
+def sorted_section_by_nonzero_plane(obj, plane):
+    """
+    Function for find section of some rotation figure by plane
+    Work only with nonzero plane without tangents in section
+    :param obj: ndarray
+        points in format (radius, z) which represent the rotation figure
+    :param plane: array_like
+        three digits - a, b and c for plane `ax + by = c`
+        only one of a, b, c can be zero
+    :return section: ndarray
+        ordered points which represent the section
+    """
+
+    res = [[], []]
+    ind = -1
+    for i, p in enumerate(obj):
+        intersect = get_intersection(p[0], p[1], plane)
+        if len(intersect) == 0:
+            ind = len(res[0])
+        else:
+            res[0].append(intersect[0])
+            res[1].append(intersect[1])
+    if ind != -1:
+        res[0] = res[0][ind:] + res[0][:ind]
+        res[1] = res[1][ind:] + res[1][:ind]
+    res[1].reverse()
+    return np.array(res[0] + res[1])
