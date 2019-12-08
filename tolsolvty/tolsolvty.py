@@ -234,7 +234,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
     maxsv = max(sv)
 
     if minsv != 0 and maxsv / minsv < 1.0e+16:
-        x = lstsq(Ac, bc)
+        x = lstsq(Ac, bc)[0]
     else:
         x = np.zeros(n)
 
