@@ -16,20 +16,16 @@ def run_example_intlinsys1():
     tp = mat['Data'][0][1][0][0] * 1e-3
     tz = mat['Data'][1][1][0][0]
     ind = int((t - tz) / tp)
-    if ind > 0:
-        b_inf = np.min(sign_bb[:, :, ind - 1:ind + 1], axis=2)
-    else:
-        b_inf = sign_bb[:, :, ind]
-    if ind < sign_bb.shape[2] - 1:
-        b_sup = np.max(sign_bb[:, :, ind:ind + 2], axis=2)
-    else:
-        b_sup = sign_bb[:, :, ind]
+    ind_inf = ind - 1 if ind > 0 else ind
+    ind_sup = ind + 1 if ind < sign_bb.shape[2] - 1 else ind
+    b_inf = np.min(sign_bb[:, :, ind_inf:ind_sup + 1], axis=2)
+    b_sup = np.max(sign_bb[:, :, ind_inf:ind_sup + 1], axis=2)
     b_inf = np.rot90(b_inf, 2).T.reshape(256)
     b_sup = np.rot90(b_sup, 2).T.reshape(256)
 
     tolmax, argmax = solve(matrix, b_inf, b_sup, verbose=True)
 
-    b_inf = np.rot90(sign_bb[:, :, ind] - abs(tolmax), 2).T.reshape(256)
-    b_sup = np.rot90(sign_bb[:, :, ind] + abs(tolmax), 2).T.reshape(256)
+    b_inf -= abs(tolmax)
+    b_sup += abs(tolmax)
 
     tolmax, argmax = solve(matrix, b_inf, b_sup, verbose=True)
