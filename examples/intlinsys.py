@@ -3,7 +3,7 @@ from scipy.io import loadmat
 
 from chord_matrix import generate_chord_matrix
 from examples.gfileextractor import run_example_extract
-from tolsolvty.tolsolvty import tolsolvty
+from intlinsys import solve
 
 
 def run_example_intlinsys1():
@@ -27,6 +27,9 @@ def run_example_intlinsys1():
     b_inf = np.rot90(b_inf, 2).T.reshape(256)
     b_sup = np.rot90(b_sup, 2).T.reshape(256)
 
-    print('Condition number of the matrix: %f' % np.linalg.cond(matrix))
-    tolmax, argmax, envs, ccode = tolsolvty(matrix, matrix, b_inf, b_sup)
-    print(tolmax, argmax, envs, ccode, sep='\n')
+    tolmax, argmax = solve(matrix, b_inf, b_sup, verbose=True)
+
+    b_inf = np.rot90(sign_bb[:, :, ind] - abs(tolmax), 2).T.reshape(256)
+    b_sup = np.rot90(sign_bb[:, :, ind] + abs(tolmax), 2).T.reshape(256)
+
+    tolmax, argmax = solve(matrix, b_inf, b_sup, verbose=True)
