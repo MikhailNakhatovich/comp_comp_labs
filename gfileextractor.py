@@ -36,7 +36,7 @@ def extract(filename, mag_mesh):
             for k in range(NBDRY):
                 ZBDRY[k] = float(data[i + k])
 
-    Z = 0.5 * zdim * np.arange(-mag_mesh, mag_mesh, 2) / mag_mesh  # расчитываем координатную сетку в метрах
-    R = 0.5 * rdim * np.arange(0, 2 * mag_mesh, 2) / mag_mesh
+    Z = 0.5 * zdim * np.arange(-mag_mesh + 1, mag_mesh, 2) / mag_mesh  # расчитываем координатную сетку в метрах
+    R = 0.5 * rdim * np.arange(1, 2 * mag_mesh, 2) / mag_mesh
 
     return flux, RBDRY, ZBDRY, NBDRY, R, Z, rdim, zdim
