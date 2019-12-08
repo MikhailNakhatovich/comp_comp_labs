@@ -152,10 +152,13 @@ def tolsolvty(infA, supA, infb, supb, *args):
     for i, val in enumerate(args[:len(variables)]):
         locals()[variables[i]] = val
     weight = np.array(weight)
-    if weight.shape[0] != m:
+    if weight.shape != tuple([m]):
         raise ValueError('Размер вектора весовых коэффициентов задан некорректно')
     if np.any(weight <= 0):
         raise ValueError('Вектор весовых коэффициентов должен быть положительным')
+
+    b = 0.5 * (infb + supb)
+    bh = 0.5 * (supb - infb)
 
     def calcfg(x):
         """
@@ -165,73 +168,54 @@ def tolsolvty(infA, supA, infb, supb, *args):
         """
 
         # предварительное размещение рабочих массивов
-        infs = np.zeros(m)
-        sups = np.zeros(m)
 
-        tt = np.zeros(m)
-        dl = np.zeros(n)
-        ds = np.zeros(n)
+        mags = np.zeros(m)
+        dl = np.zeros((n, m))
+        ds = np.zeros((n, m))
         dd = np.zeros((n, m))
 
         # вычисляем значение распознающего функционала и матрицу dd,
         # составленную из суперградиентов его образующих
 
-        for i in range(m):
-            los = 0.5 * (infb[i] + supb[i])
-            sus = los
-            for j in range(n):
-                if x[j] >= 0:
-                    los = los - supA[i, j] * x[j]
-                    sus = sus - infA[i, j] * x[j]
-                else:
-                    los = los - infA[i, j] * x[j]
-                    sus = sus - supA[i, j] * x[j]
-            # нижний и верхний концы интервала, который получается под модулем в выражении для i-ой образующей
-            infs[i] = los
-            sups[i] = sus
+        x_pos = np.where(x >= 0)[0]
+        x_neg = np.where(x < 0)[0]
+        supAx = supA * x
+        infAx = infA * x
 
-        # вычисление значения i-ой образующей распознающего функционала и её суперградиента
-        for i in range(m):
-            los = infs[i]
-            sus = sups[i]
-            alos = np.abs(los)
-            asus = np.abs(sus)
+        # нижний и верхний концы интервала, который получается под модулем
+        infs = b - np.sum(supAx[:, x_pos], axis=1) - np.sum(infAx[:, x_neg], axis=1)
+        sups = b - np.sum(infAx[:, x_pos], axis=1) - np.sum(supAx[:, x_neg], axis=1)
 
-            # вычисление суперградиента dl нижнего конца
-            for j in range(n):
-                dm = infA[i, j]
-                dp = supA[i, j]
-                if x[j] < 0:
-                    dl[j] = dm
-                else:
-                    dl[j] = dp
+        # модуль
+        ainfs = np.abs(infs)
+        asups = np.abs(sups)
 
-            # вычисление суперградиента ds верхнего конца
-            for j in range(n):
-                dm = supA[i, j]
-                dp = infA[i, j]
-                if x[j] < 0:
-                    ds[j] = dm
-                else:
-                    ds[j] = dp
+        # вычисление значения образующих распознающего функционала и их суперградиентов
+        delta = 1.0e-6  # разная точность чисел у python и matlab
+        diff = ainfs - asups
+        ind1 = np.where(diff > delta)[0]
+        ind2 = np.where(-diff > delta)[0]
+        ind3 = np.where(np.abs(diff) <= delta)[0]
+        sups_pos = np.where(sups > 0)[0]
+        sups_neg = np.where(sups <= 0)[0]
 
-            delta = 1.0e-6  # разная точность чисел у python и matlab
-            # сборка полного суперградиента i-ой образующей
-            if abs(alos - asus) > delta:
-                if alos - asus > delta:
-                    mags = alos
-                    dd[:, i] = -weight[i] * dl
-                else:
-                    mags = asus
-                    dd[:, i] = weight[i] * ds
-            else:
-                mags = alos
-                if sups[i] > 0:
-                    dd[:, i] = weight[i] * ds
-                else:
-                    dd[:, i] = -weight[i] * dl
-            # нахождение и запоминание значения i-ой образующей
-            tt[i] = weight[i] * (0.5 * (supb[i] - infb[i]) - mags)
+        # вычисление суперградиента dl нижнего конца и суперградиента ds верхнего конца
+        dl[x_neg, :] = infA[:, x_neg].T
+        ds[x_neg, :] = supA[:, x_neg].T
+        dl[x_pos, :] = supA[:, x_pos].T
+        ds[x_pos, :] = infA[:, x_pos].T
+
+        # сборка полного суперградиента
+        dd[:, ind1] = -weight[ind1] * dl[:, ind1]
+        dd[:, ind2] = weight[ind2] * ds[:, ind2]
+        dd[:, sups_pos] = weight[sups_pos] * ds[:, sups_pos]
+        dd[:, sups_neg] = -weight[sups_neg] * dl[:, sups_neg]
+
+        # нахождение и запоминание значения образующих
+        mags[ind1] = ainfs[ind1]
+        mags[ind2] = asups[ind2]
+        mags[ind3] = ainfs[ind3]
+        tt = weight * (bh - mags)
 
         # выбираем минимальную по значению образующую
         # и конструируем общий суперградиент
@@ -244,7 +228,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
     иначе берём начальным приближением нулевой вектор 
     """
     Ac = 0.5 * (infA + supA)
-    bc = 0.5 * (infb + supb)
+    bc = b
     uu, sv, vv = svd(Ac)
     minsv = min(sv)
     maxsv = max(sv)
@@ -312,16 +296,16 @@ def tolsolvty(infA, supA, infb, supb, *args):
         cal = 0
         deltax = 0
         while r > 0 and cal <= 500:
-            cal = cal + 1
-            x = x + hs * g
-            deltax = deltax + hs * normg
+            cal += 1
+            x += hs * g
+            deltax += hs * normg
             f, g1, tt = calcfg(x)
             if f > ff:
                 ff = f
                 xx = x
             # если прошло nh шагов одномерного подъёма, то увеличиваем величину шага hs
             if cal % nh == 0:
-                hs = hs*q2
+                hs = hs * q2
             r = np.dot(g, g1)
 
         # если превышен лимит числа шагов одномерного подъёма, то выход
@@ -332,10 +316,10 @@ def tolsolvty(infA, supA, infb, supb, *args):
         if cal == 1:
             hs = hs * q1
         # уточняем статистику и при необходимости выводим её
-        ncals = ncals + cal
+        ncals += cal
         if itn == lp:
             print('\t%d\t%f\t%f\t%d\t%d', itn, f, ff, cal, ncals)
-            lp = lp + iprn
+            lp += iprn
         # если вариация аргумента в одномерном поиске мала, то выход
         if deltax < epsx:
             ccode = 3
@@ -344,7 +328,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
         # пересчитываем матрицу преобразования пространства
         dg = np.dot(B.T, g1 - g0)
         xi = np.expand_dims(dg / norm(dg), axis=-1)
-        B = B + w * B * xi * xi.T
+        B += w * B * xi * xi.T
         g0 = g1
         # проверка изменения значения функционала, относительного либо абсолютного, на последних nsims шагах алгоритма
         vf = np.roll(vf, 1)
