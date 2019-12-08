@@ -5,6 +5,22 @@ from tolsolvty.tolsolvty import tolsolvty
 
 
 def solve(a, b_inf, b_sup, *args, verbose=False):
+    """
+    Function for solving interval linear system `ax = [b_inf, b_sup]`
+    :param a: (M, N) array_like
+        "coefficient" matrix
+    :param b_inf: (M,) array_like
+        ordinate or "dependent variable" values
+    :param b_sup: (M,) array_like
+        ordinate or "dependent variable" values
+    :param args:
+        see description for optional arguments for `tolsolvty` function
+    :param verbose:
+        if `True` it needs to draw plots
+    :return: tolmax, argmax
+        see description for returning values of `tolsolvty` function
+    """
+
     if verbose:
         print('Condition number of the matrix: %f' % np.linalg.cond(a))
 
