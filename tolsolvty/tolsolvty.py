@@ -148,19 +148,28 @@ def tolsolvty(infA, supA, infb, supb, *args):
     tab_line = 'Шаг        Tol(x)         Tol(xx)   ВычФун/шаг  ВычФун'
 
     # переназначение параметров алгоритма, заданных пользователем
-    variables = ['iprn', 'weight', 'epsf', 'epsx', 'epsg', 'maxitn']
-    for i, val in enumerate(args[:len(variables)]):
-        locals()[variables[i]] = val
-    weight = np.array(weight)
-    if weight.shape != tuple([m]):
-        raise ValueError('Размер вектора весовых коэффициентов задан некорректно')
-    if np.any(weight <= 0):
-        raise ValueError('Вектор весовых коэффициентов должен быть положительным')
+    largs = len(args)
+    if largs > 0:
+        iprn = args[0]
+        if largs > 1:
+            weight = np.array(args[1])
+            if weight.shape != tuple([m]):
+                raise ValueError('Размер вектора весовых коэффициентов задан некорректно')
+            if np.any(weight <= 0):
+                raise ValueError('Вектор весовых коэффициентов должен быть положительным')
+            if largs > 2:
+                epsf = args[2]
+                if largs > 3:
+                    epsx = args[3]
+                    if largs > 4:
+                        epsg = args[4]
+                        if largs > 5:
+                            maxitn = args[5]
 
     b = 0.5 * (infb + supb)
     bh = 0.5 * (supb - infb)
 
-    def calcfg(x):
+    def calcfg(_x):
         """
         Функция, которая вычисляет значение f максимизируемого распознающего
         функционала и его суперградиент g;  кроме того, она выдаёт вектор tt
@@ -177,10 +186,10 @@ def tolsolvty(infA, supA, infb, supb, *args):
         # вычисляем значение распознающего функционала и матрицу dd,
         # составленную из суперградиентов его образующих
 
-        x_pos = np.where(x >= 0)[0]
-        x_neg = np.where(x < 0)[0]
-        supAx = supA * x
-        infAx = infA * x
+        x_pos = np.where(_x >= 0)[0]
+        x_neg = np.where(_x < 0)[0]
+        supAx = supA * _x
+        infAx = infA * _x
 
         # нижний и верхний концы интервала, который получается под модулем
         infs = b - np.sum(supAx[:, x_pos], axis=1) - np.sum(infAx[:, x_neg], axis=1)
@@ -215,12 +224,12 @@ def tolsolvty(infA, supA, infb, supb, *args):
         mags[ind1] = ainfs[ind1]
         mags[ind2] = asups[ind2]
         mags[ind3] = ainfs[ind3]
-        tt = weight * (bh - mags)
+        _tt = weight * (bh - mags)
 
         # выбираем минимальную по значению образующую
         # и конструируем общий суперградиент
-        mc = np.argmin(tt)
-        return tt[mc], dd[:, mc], tt
+        mc = np.argmin(_tt)
+        return _tt[mc], dd[:, mc], _tt
 
     """
     формируем начальное приближение x как решение либо псевдорешение 
@@ -229,7 +238,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
     """
     Ac = 0.5 * (infA + supA)
     bc = b
-    uu, sv, vv = svd(Ac)
+    sv = svd(Ac, compute_uv=False)
     minsv = min(sv)
     maxsv = max(sv)
 
@@ -260,11 +269,11 @@ def tolsolvty(infA, supA, infb, supb, *args):
     ncals = 1
 
     if iprn > 0:
-        print('\t%52s', tit_line)
-        print('%65s', hor_line)
-        print('\t%50s', tab_line)
-        print('%65s', hor_line)
-        print('\t%d\t%f\t%f\t%d\t%d', 0, f, ff, cal, ncals)
+        print('\t%52s' % tit_line)
+        print('%65s' % hor_line)
+        print('\t%50s' % tab_line)
+        print('%65s' % hor_line)
+        print('\t%d\t%f\t%f\t%d\t%d' % (0, f, ff, cal, ncals))
 
     """
     основной цикл программы:
@@ -305,7 +314,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
                 xx = x
             # если прошло nh шагов одномерного подъёма, то увеличиваем величину шага hs
             if cal % nh == 0:
-                hs = hs * q2
+                hs *= q2
             r = np.dot(g, g1)
 
         # если превышен лимит числа шагов одномерного подъёма, то выход
@@ -314,11 +323,11 @@ def tolsolvty(infA, supA, infb, supb, *args):
             break
         # если одномерный подъём занял один шаг, то уменьшаем величину шага hs
         if cal == 1:
-            hs = hs * q1
+            hs *= q1
         # уточняем статистику и при необходимости выводим её
         ncals += cal
         if itn == lp:
-            print('\t%d\t%f\t%f\t%d\t%d', itn, f, ff, cal, ncals)
+            print('\t%d\t%f\t%f\t%d\t%d' % (itn, f, ff, cal, ncals))
             lp += iprn
         # если вариация аргумента в одномерном поиске мала, то выход
         if deltax < epsx:
@@ -354,8 +363,8 @@ def tolsolvty(infA, supA, infb, supb, *args):
     # вывод результатов работы
     if iprn > 0:
         if itn % iprn != 0:
-            print('\t%d\t%f\t%f\t%d\t%d', itn, f, ff, cal, ncals)
-        print('%65s', hor_line)
+            print('\t%d\t%f\t%f\t%d\t%d' % (itn, f, ff, cal, ncals))
+        print('%65s' % hor_line)
 
     if tolmax >= 0:
         print('Допусковое множество решений интервальной линейной системы непусто')
