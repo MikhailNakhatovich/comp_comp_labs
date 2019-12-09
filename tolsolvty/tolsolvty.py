@@ -293,8 +293,8 @@ def tolsolvty(infA, supA, infb, supb, *args):
             break
 
         # вычисляем суперградиент в преобразованном пространстве, определяем направление подъёма
-        g1 = np.dot(B.T, g0)
-        g = np.dot(B,  g1 / norm(g1, 2))
+        g1 = B.T.dot(g0)
+        g = B.dot(g1) / norm(g1, 2)
         normg = norm(g, 2)
         """
         одномерный подъём по направлению g:
@@ -335,9 +335,9 @@ def tolsolvty(infA, supA, infb, supb, *args):
             break
 
         # пересчитываем матрицу преобразования пространства
-        dg = np.dot(B.T, g1 - g0)
+        dg = B.T.dot(g1 - g0)
         xi = np.expand_dims(dg / norm(dg), axis=-1)
-        B += w * B * xi * xi.T
+        B += w * B.dot(xi).dot(xi.T)
         g0 = g1
         # проверка изменения значения функционала, относительного либо абсолютного, на последних nsims шагах алгоритма
         vf = np.roll(vf, 1)
