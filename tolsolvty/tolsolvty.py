@@ -242,7 +242,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
     minsv = min(sv)
     maxsv = max(sv)
 
-    if minsv != 0 and maxsv / minsv < 1.0e+16:
+    if minsv != 0 and maxsv / minsv < 1.0e+15:
         x = lstsq(Ac, bc)[0]
     else:
         x = np.zeros(n)
@@ -255,7 +255,7 @@ def tolsolvty(infA, supA, infb, supb, *args):
            суперградиента минимизируемого функционала и др.
     """
     B = np.eye(n)                 # инициализируем единичной матрицей
-    vf = np.inf * np.ones(nsims)  # инициализируем самыми большими числами
+    vf = np.full(nsims, np.inf)   # инициализируем самыми большими числами
 
     # установка начальных параметров
 
