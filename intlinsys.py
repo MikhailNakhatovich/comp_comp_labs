@@ -1,7 +1,46 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.linalg import cond
 
 from tolsolvty.tolsolvty import tolsolvty
+
+
+def heur_min_cond(a, r=0.1, n=10):
+    """
+    Function for estimating of the condition number of the interval matrix
+    :param a: (M, N) array_like
+        matrix
+    :param r: float
+        radius of the elements of the matrix `a`
+        must be in an interval [0, 1]
+    :param n: int
+        count of iterations
+        must be positive
+    :return min_cond: {float, inf}
+        estimating of the condition number of the interval matrix `[(1-r)a, (1+r)a]`
+    """
+    
+    a = np.array(a)
+    a_inf = a * (1 - r)
+    a_sup = a * (1 + r)
+
+    matr1 = np.ones_like(a)
+    matr2 = np.ones_like(a)
+
+    min_cond = np.inf
+
+    for i in range(n):
+        epm = np.random.randint(0, high=2, size=a.shape[:2])
+        ind0 = np.where(epm == 0)
+        ind1 = np.where(epm == 1)
+        matr1[ind0] = a_inf[ind0]
+        matr2[ind0] = a_sup[ind0]
+        matr1[ind1] = a_sup[ind1]
+        matr2[ind1] = a_inf[ind1]
+
+        min_cond = min(min_cond, cond(matr1, 2), cond(matr2, 2))
+
+    return min_cond
 
 
 def solve(a, b_inf, b_sup, *args, verbose=False):
@@ -22,7 +61,7 @@ def solve(a, b_inf, b_sup, *args, verbose=False):
     """
 
     if verbose:
-        print('Condition number of the matrix: %f' % np.linalg.cond(a))
+        print('Condition number of the matrix: %f' % cond(a))
 
     tolmax, argmax, envs, ccode = tolsolvty(a, a, b_inf, b_sup, *args)
 
