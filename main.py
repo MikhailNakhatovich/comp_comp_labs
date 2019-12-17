@@ -1,5 +1,5 @@
-from examples.intlinsys import run_example_intlinsys1
+from examples.linprog import run_example_linprog1
 
 
 if __name__ == '__main__':
-    run_example_intlinsys1()
+    run_example_linprog1()
