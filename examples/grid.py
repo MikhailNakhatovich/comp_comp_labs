@@ -1,4 +1,4 @@
-from examples.gfileextractor import run_example_extract
+from examples.fileextractor import run_example_extract
 from grid import generate_grid, draw_grid, generate_domain_grid, draw_domains
 
 
