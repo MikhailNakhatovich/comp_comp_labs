@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from chord_matrix import generate_chord_matrix
-from examples.gfileextractor import run_example_extract
+from examples.fileextractor import run_example_extract
 
 
 def run_example_chord1():
